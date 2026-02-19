@@ -63,6 +63,23 @@ class UsageAnalysis:
 # MODEL PRICING DATABASE (per 1M tokens)
 # =============================================================================
 
+
+def parse_iso_timestamp(value: str) -> datetime:
+    """Parse ISO format timestamp, handling Z suffix."""
+    if not value:
+        return datetime.now()
+    try:
+        # Handle Z suffix and other timezone formats
+        clean = value.replace("Z", "+00:00")
+        return datetime.fromisoformat(clean)
+    except Exception:
+        # Fallback: try without timezone
+        try:
+            return datetime.fromisoformat(value.rstrip("Z"))
+        except Exception:
+            return datetime.now()
+
+
 MODEL_PRICING = {
     # OpenAI
     "gpt-4": {"input": 30.00, "output": 60.00},
@@ -202,7 +219,7 @@ def parse_openai_export(filepath: Path) -> list[UsageRecord]:
     for entry in entries:
         try:
             record = UsageRecord(
-                timestamp=datetime.fromisoformat(
+                timestamp=parse_iso_timestamp(
                     entry.get("timestamp", entry.get("created_at", ""))
                 ),
                 model=normalize_model_name(entry.get("model", "unknown")),
@@ -246,7 +263,7 @@ def parse_anthropic_export(filepath: Path) -> list[UsageRecord]:
         try:
             usage = entry.get("usage", {})
             record = UsageRecord(
-                timestamp=datetime.fromisoformat(entry.get("created_at", "")),
+                timestamp=parse_iso_timestamp(entry.get("created_at", "")),
                 model=normalize_model_name(entry.get("model", "unknown")),
                 prompt_tokens=usage.get("input_tokens", 0),
                 completion_tokens=usage.get("output_tokens", 0),
@@ -291,7 +308,7 @@ def parse_csv_logs(filepath: Path) -> list[UsageRecord]:
                 prompt = row.get("prompt") or row.get("input") or row.get("request") or ""
 
                 record = UsageRecord(
-                    timestamp=datetime.fromisoformat(timestamp) if timestamp else datetime.now(),
+                    timestamp=parse_iso_timestamp(timestamp),
                     model=normalize_model_name(model),
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
@@ -430,10 +447,9 @@ def parse_timestamp(entry: dict) -> datetime:
             if isinstance(value, (int, float)):
                 return datetime.fromtimestamp(value)
             elif isinstance(value, str):
-                try:
-                    return datetime.fromisoformat(value.replace("Z", "+00:00"))
-                except Exception:
-                    pass
+                result = parse_iso_timestamp(value)
+                if result != datetime.now():
+                    return result
 
     return datetime.now()
 
