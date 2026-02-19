@@ -1,0 +1,194 @@
+# Sample Optimization Report
+
+**Generated:** 2024-01-16 18:00:00  
+**Analysis Period:** 2024-01-15 to 2024-01-16
+
+---
+
+## 📊 Executive Summary
+
+| Metric | Value |
+|--------|-------|
+| Total Requests | 20 |
+| Total Tokens | 56,820 |
+| Current Cost | $1.42 |
+| Optimized Cost | $0.48 |
+| **Monthly Savings** | **$0.94** |
+| **Annual Savings** | **$11.28** |
+| Savings Percentage | 66.2% |
+
+---
+
+## 💰 Current Cost Breakdown
+
+| Model | Cost | Percentage | Requests |
+|-------|------|------------|----------|
+| gpt-4-turbo | $0.78 | 54.9% | 11 |
+| claude-3-opus | $0.42 | 29.6% | 2 |
+| claude-3.5-sonnet | $0.21 | 14.8% | 5 |
+| gpt-3.5-turbo | $0.01 | 0.7% | 2 |
+
+---
+
+## 🎯 Routing Recommendations
+
+### 1. Simple Tasks
+
+- **Current:** gpt-4-turbo
+- **Recommended:** llama-3.1-8b (🏠 Local)
+- **Monthly Savings:** $0.12
+- **Confidence:** 95%
+
+Tasks identified:
+- "What is the capital of France?"
+- "What year did World War 2 end?"
+- "Who wrote Romeo and Juliet?"
+- "What is 15% of 340?"
+
+### 2. Code Tasks
+
+- **Current:** gpt-4-turbo
+- **Recommended:** deepseek-coder-6.7b (🏠 Local)
+- **Monthly Savings:** $0.28
+- **Confidence:** 80%
+
+Tasks identified:
+- Fibonacci function implementation
+- JavaScript debugging
+- Flask API endpoint
+- Binary search tree implementation
+- Async/await conversion
+
+### 3. Translation Tasks
+
+- **Current:** claude-3.5-sonnet
+- **Recommended:** qwen2.5-7b (🏠 Local)
+- **Monthly Savings:** $0.02
+- **Confidence:** 85%
+
+### 4. Extraction Tasks
+
+- **Current:** claude-3.5-sonnet
+- **Recommended:** phi3-mini (🏠 Local)
+- **Monthly Savings:** $0.03
+- **Confidence:** 90%
+
+---
+
+## 🌳 Decision Tree
+
+```
+Request
+├── Task: simple
+│   └── Route to llama-3.1-8b
+│       💰 $0.12
+│       📊 95%
+├── Task: code
+│   └── Route to deepseek-coder-6.7b
+│       💰 $0.28
+│       📊 80%
+├── Task: translation
+│   └── Route to qwen2.5-7b
+│       💰 $0.02
+│       📊 85%
+├── Task: extraction
+│   └── Route to phi3-mini
+│       💰 $0.03
+│       📊 90%
+├── Task: reasoning
+│   └── Keep claude-3-opus
+│       (Complex reasoning requires premium model)
+└── Default
+    └── Keep original model
+        (No better option available)
+```
+
+---
+
+## 📈 Cost Comparison
+
+```
+BEFORE                          AFTER
+─────────────────────────────────────────────────────────
+gpt-4-turbo    ████████████░░  $0.78   ████░░░░░░░░░░  $0.26
+claude-3-opus  ██████░░░░░░░░  $0.42   ██████░░░░░░░░  $0.42
+claude-3.5     ███░░░░░░░░░░░  $0.21   ░░░░░░░░░░░░░░  $0.00
+gpt-3.5        ░░░░░░░░░░░░░░  $0.01   ░░░░░░░░░░░░░░  $0.00
+Local          ░░░░░░░░░░░░░░  $0.00   ░░░░░░░░░░░░░░  $0.00
+─────────────────────────────────────────────────────────
+TOTAL                          $1.42                    $0.68
+
+SAVINGS: $0.74 (52%)
+```
+
+---
+
+## 💾 Implementation Config
+
+```json
+{
+  "version": "1.0",
+  "routing_rules": [
+    {
+      "name": "route_simple",
+      "task_type": "simple",
+      "target_model": "llama-3.1-8b",
+      "priority": 100,
+      "conditions": {
+        "prompt_tokens_lt": 500,
+        "complexity": "low"
+      }
+    },
+    {
+      "name": "route_code",
+      "task_type": "code",
+      "target_model": "deepseek-coder-6.7b",
+      "priority": 60,
+      "conditions": {
+        "keywords": ["function", "code", "debug", "implement"]
+      }
+    },
+    {
+      "name": "route_extraction",
+      "task_type": "extraction",
+      "target_model": "phi3-mini",
+      "priority": 90,
+      "conditions": {
+        "keywords": ["extract", "parse", "find", "JSON"]
+      }
+    }
+  ],
+  "default_model": "gpt-3.5-turbo",
+  "fallback_model": "gpt-4-turbo",
+  "local_models": {
+    "enabled": true,
+    "endpoint": "http://localhost:11434",
+    "models": ["llama-3.1-8b", "qwen2.5-7b", "deepseek-coder-6.7b", "phi3-mini"]
+  }
+}
+```
+
+---
+
+## 📋 Next Steps
+
+1. **Set up Ollama** with recommended models:
+   ```bash
+   ollama pull llama3.1:8b
+   ollama pull deepseek-coder:6.7b
+   ollama pull qwen2.5:7b
+   ollama pull phi3:mini
+   ```
+
+2. **Implement routing logic** in your LLM gateway using the config above
+
+3. **Monitor quality metrics** after switching:
+   - Response accuracy
+   - User satisfaction
+   - Latency
+
+4. **Iterate** based on real-world performance
+
+---
+
+*Generated by [LLM Cost Optimizer](https://github.com/tommieseals/llm-cost-optimizer)*

@@ -1,0 +1,184 @@
+{
+  "usage": [
+    {
+      "timestamp": "2024-01-15T09:23:45Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 1250,
+      "completion_tokens": 450,
+      "total_tokens": 1700,
+      "prompt": "What is the capital of France?",
+      "latency_ms": 1200
+    },
+    {
+      "timestamp": "2024-01-15T09:45:12Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 2100,
+      "completion_tokens": 1800,
+      "total_tokens": 3900,
+      "prompt": "Write a Python function to calculate the fibonacci sequence using dynamic programming. Include error handling and type hints.",
+      "latency_ms": 3400
+    },
+    {
+      "timestamp": "2024-01-15T10:12:33Z",
+      "model": "claude-3.5-sonnet",
+      "prompt_tokens": 450,
+      "completion_tokens": 120,
+      "total_tokens": 570,
+      "prompt": "Translate 'Hello, how are you?' to Spanish",
+      "latency_ms": 800
+    },
+    {
+      "timestamp": "2024-01-15T10:34:21Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 3500,
+      "completion_tokens": 2200,
+      "total_tokens": 5700,
+      "prompt": "Analyze the following data and provide insights on customer behavior patterns. Compare the trends across different demographics.",
+      "latency_ms": 5200
+    },
+    {
+      "timestamp": "2024-01-15T11:05:18Z",
+      "model": "claude-3.5-sonnet",
+      "prompt_tokens": 890,
+      "completion_tokens": 340,
+      "total_tokens": 1230,
+      "prompt": "Extract all email addresses from the following text and return as JSON array",
+      "latency_ms": 1100
+    },
+    {
+      "timestamp": "2024-01-15T11:22:45Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 150,
+      "completion_tokens": 50,
+      "total_tokens": 200,
+      "prompt": "What year did World War 2 end?",
+      "latency_ms": 600
+    },
+    {
+      "timestamp": "2024-01-15T11:45:33Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 4200,
+      "completion_tokens": 3100,
+      "total_tokens": 7300,
+      "prompt": "Debug this JavaScript code that's throwing a TypeError. Fix the issue and explain what was wrong.",
+      "latency_ms": 6800
+    },
+    {
+      "timestamp": "2024-01-15T12:10:22Z",
+      "model": "claude-3.5-sonnet",
+      "prompt_tokens": 1800,
+      "completion_tokens": 900,
+      "total_tokens": 2700,
+      "prompt": "Summarize this 10-page research paper on machine learning optimization techniques",
+      "latency_ms": 2100
+    },
+    {
+      "timestamp": "2024-01-15T13:05:11Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 200,
+      "completion_tokens": 80,
+      "total_tokens": 280,
+      "prompt": "Define 'photosynthesis'",
+      "latency_ms": 500
+    },
+    {
+      "timestamp": "2024-01-15T13:30:45Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 2800,
+      "completion_tokens": 1500,
+      "total_tokens": 4300,
+      "prompt": "Create a REST API endpoint in Python Flask for user authentication with JWT tokens",
+      "latency_ms": 4100
+    },
+    {
+      "timestamp": "2024-01-15T14:15:22Z",
+      "model": "claude-3-opus",
+      "prompt_tokens": 5500,
+      "completion_tokens": 4200,
+      "total_tokens": 9700,
+      "prompt": "Think step by step through this complex mathematical proof and verify each step",
+      "latency_ms": 12000
+    },
+    {
+      "timestamp": "2024-01-15T14:45:18Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 180,
+      "completion_tokens": 60,
+      "total_tokens": 240,
+      "prompt": "Who wrote Romeo and Juliet?",
+      "latency_ms": 450
+    },
+    {
+      "timestamp": "2024-01-15T15:20:33Z",
+      "model": "claude-3.5-sonnet",
+      "prompt_tokens": 3200,
+      "completion_tokens": 2800,
+      "total_tokens": 6000,
+      "prompt": "Write a creative short story about a robot learning to paint. Include dialogue and descriptive language.",
+      "latency_ms": 4500
+    },
+    {
+      "timestamp": "2024-01-15T16:00:45Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 1900,
+      "completion_tokens": 1200,
+      "total_tokens": 3100,
+      "prompt": "Review this SQL query and optimize it for better performance. Explain your changes.",
+      "latency_ms": 2800
+    },
+    {
+      "timestamp": "2024-01-15T16:30:12Z",
+      "model": "gpt-3.5-turbo",
+      "prompt_tokens": 320,
+      "completion_tokens": 150,
+      "total_tokens": 470,
+      "prompt": "Format this JSON data with proper indentation",
+      "latency_ms": 400
+    },
+    {
+      "timestamp": "2024-01-16T09:00:00Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 2500,
+      "completion_tokens": 1800,
+      "total_tokens": 4300,
+      "prompt": "Implement a binary search tree in TypeScript with insert, delete, and search methods",
+      "latency_ms": 3900
+    },
+    {
+      "timestamp": "2024-01-16T09:45:22Z",
+      "model": "claude-3.5-sonnet",
+      "prompt_tokens": 400,
+      "completion_tokens": 200,
+      "total_tokens": 600,
+      "prompt": "Extract the product names and prices from this HTML table",
+      "latency_ms": 700
+    },
+    {
+      "timestamp": "2024-01-16T10:30:15Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 220,
+      "completion_tokens": 90,
+      "total_tokens": 310,
+      "prompt": "What is 15% of 340?",
+      "latency_ms": 380
+    },
+    {
+      "timestamp": "2024-01-16T11:15:33Z",
+      "model": "claude-3-opus",
+      "prompt_tokens": 4800,
+      "completion_tokens": 3500,
+      "total_tokens": 8300,
+      "prompt": "Analyze this legal contract and identify potential risks and ambiguities. Provide detailed reasoning.",
+      "latency_ms": 11000
+    },
+    {
+      "timestamp": "2024-01-16T12:00:45Z",
+      "model": "gpt-4-turbo",
+      "prompt_tokens": 1600,
+      "completion_tokens": 800,
+      "total_tokens": 2400,
+      "prompt": "Convert this Python code to use async/await pattern instead of threading",
+      "latency_ms": 2200
+    }
+  ]
+}
