@@ -6,10 +6,9 @@ Generate charts, decision trees, and visual reports.
 """
 
 import json
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
-from collections import defaultdict
+from typing import Any
 
 from .analyzer import UsageAnalysis
 from .optimizer import RoutingRecommendation
@@ -28,87 +27,87 @@ except ImportError:
 # ASCII VISUALIZATION (No Dependencies)
 # =============================================================================
 
-def ascii_bar_chart(data: Dict[str, float], title: str = "", width: int = 50) -> str:
+def ascii_bar_chart(data: dict[str, float], title: str = "", width: int = 50) -> str:
     """Generate ASCII horizontal bar chart"""
     if not data:
         return "No data to display"
-    
+
     lines = []
     if title:
         lines.append(f"\n{title}")
         lines.append("=" * len(title))
-    
+
     max_val = max(data.values())
     max_label_len = max(len(str(k)) for k in data.keys())
-    
+
     for label, value in sorted(data.items(), key=lambda x: -x[1]):
         bar_len = int((value / max_val) * width) if max_val > 0 else 0
         bar = "█" * bar_len + "░" * (width - bar_len)
         pct = (value / sum(data.values())) * 100 if sum(data.values()) > 0 else 0
-        
+
         if isinstance(value, float) and value < 100:
             val_str = f"${value:.2f}"
         else:
             val_str = f"{value:,.0f}"
-        
+
         lines.append(f"{label:<{max_label_len}}  {bar}  {pct:5.1f}%  {val_str}")
-    
+
     return "\n".join(lines)
 
 
-def ascii_pie_chart(data: Dict[str, float], title: str = "") -> str:
+def ascii_pie_chart(data: dict[str, float], title: str = "") -> str:
     """Generate ASCII pie chart representation"""
     if not data:
         return "No data to display"
-    
+
     lines = []
     if title:
         lines.append(f"\n{title}")
         lines.append("=" * len(title))
-    
+
     total = sum(data.values())
-    
+
     # Simple percentage breakdown
     for label, value in sorted(data.items(), key=lambda x: -x[1]):
         pct = (value / total) * 100 if total > 0 else 0
         blocks = int(pct / 5)  # Each block = 5%
         bar = "▓" * blocks + "░" * (20 - blocks)
-        
+
         if isinstance(value, float) and value < 100:
             val_str = f"${value:.2f}"
         else:
             val_str = f"{value:,.0f}"
-        
+
         lines.append(f"  {label:<20} {bar} {pct:5.1f}% ({val_str})")
-    
+
     return "\n".join(lines)
 
 
-def ascii_comparison_chart(before: Dict[str, float], after: Dict[str, float], 
+def ascii_comparison_chart(before: dict[str, float], after: dict[str, float],
                            title: str = "Before/After Comparison") -> str:
     """Generate side-by-side comparison chart"""
     lines = []
     lines.append(f"\n{title}")
     lines.append("=" * len(title))
-    
+
     all_keys = set(before.keys()) | set(after.keys())
     max_label = max(len(k) for k in all_keys) if all_keys else 10
-    
+
     lines.append(f"{'Item':<{max_label}}  {'BEFORE':>12}  {'AFTER':>12}  {'SAVINGS':>12}  CHANGE")
     lines.append("-" * (max_label + 60))
-    
+
     total_before = 0
     total_after = 0
-    
+
     for key in sorted(all_keys):
         b = before.get(key, 0)
         a = after.get(key, 0)
         savings = b - a
         pct_change = ((b - a) / b * 100) if b > 0 else 0
-        
+
         total_before += b
         total_after += a
-        
+
         # Visual indicator
         if savings > 0:
             indicator = "↓ " + "▼" * min(int(pct_change / 10), 10)
@@ -116,27 +115,27 @@ def ascii_comparison_chart(before: Dict[str, float], after: Dict[str, float],
             indicator = "↑ " + "▲" * min(int(abs(pct_change) / 10), 10)
         else:
             indicator = "─"
-        
+
         lines.append(f"{key:<{max_label}}  ${b:>10.2f}  ${a:>10.2f}  ${savings:>10.2f}  {indicator}")
-    
+
     lines.append("-" * (max_label + 60))
     total_savings = total_before - total_after
     pct_savings = (total_savings / total_before * 100) if total_before > 0 else 0
     lines.append(f"{'TOTAL':<{max_label}}  ${total_before:>10.2f}  ${total_after:>10.2f}  ${total_savings:>10.2f}  ({pct_savings:.1f}%)")
-    
+
     return "\n".join(lines)
 
 
-def ascii_decision_tree(tree: Dict[str, Any], prefix: str = "", is_last: bool = True) -> str:
+def ascii_decision_tree(tree: dict[str, Any], prefix: str = "", is_last: bool = True) -> str:
     """Generate ASCII decision tree visualization"""
     lines = []
-    
+
     connector = "└── " if is_last else "├── "
     extension = "    " if is_last else "│   "
-    
+
     name = tree.get("name", "Node")
     lines.append(f"{prefix}{connector}{name}")
-    
+
     # Add details
     details = []
     if "savings" in tree:
@@ -145,40 +144,40 @@ def ascii_decision_tree(tree: Dict[str, Any], prefix: str = "", is_last: bool = 
         details.append(f"📊 {tree['confidence']}")
     if "reason" in tree:
         details.append(f"📝 {tree['reason']}")
-    
+
     if details:
         for detail in details:
             lines.append(f"{prefix}{extension}    {detail}")
-    
+
     children = tree.get("children", [])
     for i, child in enumerate(children):
         is_last_child = (i == len(children) - 1)
         child_tree = ascii_decision_tree(child, prefix + extension, is_last_child)
         lines.append(child_tree)
-    
+
     return "\n".join(lines)
 
 
-def ascii_trend_chart(daily_data: Dict[str, float], title: str = "Daily Trend") -> str:
+def ascii_trend_chart(daily_data: dict[str, float], title: str = "Daily Trend") -> str:
     """Generate ASCII trend chart with sparkline"""
     if not daily_data:
         return "No trend data available"
-    
+
     lines = []
     lines.append(f"\n{title}")
     lines.append("=" * len(title))
-    
+
     # Sort by date
     sorted_data = sorted(daily_data.items())
     values = [v for _, v in sorted_data]
-    
+
     if not values:
         return "No data"
-    
+
     min_val = min(values)
     max_val = max(values)
     range_val = max_val - min_val if max_val > min_val else 1
-    
+
     # Generate sparkline
     sparkline_chars = "▁▂▃▄▅▆▇█"
     sparkline = ""
@@ -186,18 +185,18 @@ def ascii_trend_chart(daily_data: Dict[str, float], title: str = "Daily Trend") 
         normalized = (v - min_val) / range_val
         idx = min(int(normalized * (len(sparkline_chars) - 1)), len(sparkline_chars) - 1)
         sparkline += sparkline_chars[idx]
-    
+
     lines.append(f"\nSparkline: {sparkline}")
     lines.append(f"Range: ${min_val:.2f} - ${max_val:.2f}")
     lines.append(f"Average: ${sum(values)/len(values):.2f}")
-    
+
     # Show first and last 5 days
     lines.append("\nRecent Days:")
     for date, value in sorted_data[-7:]:
         bar_len = int((value - min_val) / range_val * 30) if range_val > 0 else 0
         bar = "█" * bar_len
         lines.append(f"  {date}: ${value:>8.2f} {bar}")
-    
+
     return "\n".join(lines)
 
 
@@ -205,11 +204,11 @@ def ascii_trend_chart(daily_data: Dict[str, float], title: str = "Daily Trend") 
 # HTML VISUALIZATION
 # =============================================================================
 
-def generate_html_report(analysis: UsageAnalysis, 
+def generate_html_report(analysis: UsageAnalysis,
                          recommendation: RoutingRecommendation,
                          output_path: Path) -> Path:
     """Generate interactive HTML report"""
-    
+
     html = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -219,7 +218,7 @@ def generate_html_report(analysis: UsageAnalysis,
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{ 
+        body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -273,7 +272,7 @@ def generate_html_report(analysis: UsageAnalysis,
                 Analysis Period: {analysis.start_date.strftime('%Y-%m-%d')} to {analysis.end_date.strftime('%Y-%m-%d')}
             </p>
         </div>
-        
+
         <div class="stats">
             <div class="stat">
                 <div class="stat-value">{analysis.total_requests:,}</div>
@@ -292,21 +291,21 @@ def generate_html_report(analysis: UsageAnalysis,
                 <div class="stat-label">Monthly Savings ({recommendation.savings_percentage:.1f}%)</div>
             </div>
         </div>
-        
+
         <div class="card">
             <h2>📊 Cost by Model</h2>
             <div class="chart-container">
                 <canvas id="modelChart"></canvas>
             </div>
         </div>
-        
+
         <div class="card">
             <h2>📈 Cost Comparison: Before vs After</h2>
             <div class="chart-container">
                 <canvas id="comparisonChart"></canvas>
             </div>
         </div>
-        
+
         <div class="card">
             <h2>🎯 Routing Recommendations</h2>
             <table>
@@ -342,14 +341,14 @@ def generate_html_report(analysis: UsageAnalysis,
                 </tbody>
             </table>
         </div>
-        
+
         <div class="card">
             <h2>🌳 Decision Tree</h2>
             <pre style="background: #f8f9fa; padding: 20px; border-radius: 8px; overflow-x: auto;">
 {ascii_decision_tree(recommendation.decision_tree)}
             </pre>
         </div>
-        
+
         <div class="card">
             <h2>💾 Implementation Config</h2>
             <pre style="background: #1a1a2e; color: #a8ff60; padding: 20px; border-radius: 8px; overflow-x: auto;">
@@ -357,7 +356,7 @@ def generate_html_report(analysis: UsageAnalysis,
             </pre>
         </div>
     </div>
-    
+
     <script>
         // Model cost pie chart
         new Chart(document.getElementById('modelChart'), {{
@@ -380,7 +379,7 @@ def generate_html_report(analysis: UsageAnalysis,
                 }}
             }}
         }});
-        
+
         // Before/After comparison
         new Chart(document.getElementById('comparisonChart'), {{
             type: 'bar',
@@ -405,11 +404,11 @@ def generate_html_report(analysis: UsageAnalysis,
     </script>
 </body>
 </html>'''
-    
+
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(html)
-    
+
     return output_path
 
 
@@ -419,106 +418,106 @@ def generate_html_report(analysis: UsageAnalysis,
 
 def generate_matplotlib_charts(analysis: UsageAnalysis,
                                 recommendation: RoutingRecommendation,
-                                output_dir: Path) -> List[Path]:
+                                output_dir: Path) -> list[Path]:
     """Generate matplotlib charts (if available)"""
     if not HAS_MATPLOTLIB:
         print("Warning: matplotlib not installed, skipping chart generation")
         return []
-    
+
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     generated = []
-    
+
     # 1. Cost by model pie chart
     fig, ax = plt.subplots(figsize=(10, 8))
     labels = list(analysis.cost_by_model.keys())
     values = list(analysis.cost_by_model.values())
     colors = plt.cm.Set3(range(len(labels)))
-    
+
     wedges, texts, autotexts = ax.pie(
         values, labels=labels, autopct='%1.1f%%',
         colors=colors, explode=[0.02] * len(labels)
     )
     ax.set_title('Cost Distribution by Model', fontsize=14, fontweight='bold')
-    
+
     path = output_dir / 'cost_by_model.png'
     plt.savefig(path, dpi=150, bbox_inches='tight')
     plt.close()
     generated.append(path)
-    
+
     # 2. Before/After comparison
     fig, ax = plt.subplots(figsize=(10, 6))
-    
+
     categories = ['Current', 'Optimized', 'Savings']
     values = [analysis.total_cost, recommendation.optimized_cost, recommendation.monthly_savings]
     colors = ['#e74c3c', '#2ecc71', '#3498db']
-    
+
     bars = ax.bar(categories, values, color=colors, edgecolor='white', linewidth=2)
-    
+
     for bar, val in zip(bars, values):
         height = bar.get_height()
         ax.annotate(f'${val:,.2f}',
                     xy=(bar.get_x() + bar.get_width() / 2, height),
                     xytext=(0, 3), textcoords="offset points",
                     ha='center', va='bottom', fontsize=12, fontweight='bold')
-    
+
     ax.set_ylabel('Cost ($)', fontsize=12)
     ax.set_title('Cost Optimization Impact', fontsize=14, fontweight='bold')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    
+
     path = output_dir / 'cost_comparison.png'
     plt.savefig(path, dpi=150, bbox_inches='tight')
     plt.close()
     generated.append(path)
-    
+
     # 3. Daily cost trend
     if analysis.daily_costs:
         fig, ax = plt.subplots(figsize=(12, 5))
-        
+
         dates = sorted(analysis.daily_costs.keys())
         costs = [analysis.daily_costs[d] for d in dates]
-        
+
         ax.fill_between(range(len(dates)), costs, alpha=0.3, color='#667eea')
         ax.plot(range(len(dates)), costs, color='#667eea', linewidth=2, marker='o', markersize=4)
-        
+
         # Show every nth label
         n = max(1, len(dates) // 10)
         ax.set_xticks(range(0, len(dates), n))
         ax.set_xticklabels([dates[i] for i in range(0, len(dates), n)], rotation=45)
-        
+
         ax.set_ylabel('Daily Cost ($)', fontsize=12)
         ax.set_title('Daily Cost Trend', fontsize=14, fontweight='bold')
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        
+
         path = output_dir / 'daily_trend.png'
         plt.savefig(path, dpi=150, bbox_inches='tight')
         plt.close()
         generated.append(path)
-    
+
     # 4. Task distribution
     if analysis.task_distribution:
         fig, ax = plt.subplots(figsize=(10, 6))
-        
+
         tasks = list(analysis.task_distribution.keys())
         counts = list(analysis.task_distribution.values())
-        
+
         bars = ax.barh(tasks, counts, color=plt.cm.viridis(
             [i/len(tasks) for i in range(len(tasks))]
         ))
-        
+
         ax.set_xlabel('Number of Requests', fontsize=12)
         ax.set_title('Task Type Distribution', fontsize=14, fontweight='bold')
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        
+
         path = output_dir / 'task_distribution.png'
         plt.savefig(path, dpi=150, bbox_inches='tight')
         plt.close()
         generated.append(path)
-    
+
     return generated
 
 
@@ -529,10 +528,10 @@ def generate_matplotlib_charts(analysis: UsageAnalysis,
 def generate_markdown_report(analysis: UsageAnalysis,
                               recommendation: RoutingRecommendation) -> str:
     """Generate markdown format report"""
-    
+
     md = f"""# LLM Cost Optimization Report
 
-**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  
+**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Analysis Period:** {analysis.start_date.strftime('%Y-%m-%d')} to {analysis.end_date.strftime('%Y-%m-%d')}
 
 ---
@@ -556,20 +555,20 @@ def generate_markdown_report(analysis: UsageAnalysis,
 | Model | Cost | Percentage | Requests |
 |-------|------|------------|----------|
 """
-    
+
     for model in sorted(analysis.cost_by_model.keys(), key=lambda m: -analysis.cost_by_model[m]):
         cost = analysis.cost_by_model[model]
         pct = (cost / analysis.total_cost) * 100
         reqs = analysis.requests_by_model.get(model, 0)
         md += f"| {model} | ${cost:,.2f} | {pct:.1f}% | {reqs:,} |\n"
-    
-    md += f"""
+
+    md += """
 ---
 
 ## 🎯 Routing Recommendations
 
 """
-    
+
     for i, rule in enumerate(recommendation.rules[:10], 1):
         model_type = "🏠 Local" if rule.target_model in ["llama-3.1-8b", "qwen2.5-7b", "deepseek-coder-6.7b"] else "☁️ Cloud"
         md += f"""### {i}. {rule.task_type.title()} Tasks
@@ -580,7 +579,7 @@ def generate_markdown_report(analysis: UsageAnalysis,
 - **Confidence:** {rule.confidence*100:.0f}%
 
 """
-    
+
     md += f"""
 ---
 
@@ -611,7 +610,7 @@ def generate_markdown_report(analysis: UsageAnalysis,
 
 *Generated by [LLM Cost Optimizer](https://github.com/tommieseals/llm-cost-optimizer)*
 """
-    
+
     return md
 
 
@@ -622,44 +621,45 @@ def generate_markdown_report(analysis: UsageAnalysis,
 if __name__ == "__main__":
     import sys
     from pathlib import Path
+
     from .analyzer import UsageAnalyzer
     from .optimizer import RoutingOptimizer
-    
+
     if len(sys.argv) < 2:
         print("Usage: python visualizer.py <usage_log_file> [output_dir]")
         sys.exit(1)
-    
+
     filepath = Path(sys.argv[1])
     output_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("./output")
-    
+
     # Load and analyze
     analyzer = UsageAnalyzer()
     analyzer.load(filepath)
     analysis = analyzer.analyze()
-    
+
     # Optimize
     optimizer = RoutingOptimizer()
     recommendation = optimizer.optimize(analysis)
-    
+
     # Generate visualizations
     print("Generating ASCII charts...")
     print(ascii_bar_chart(analysis.cost_by_model, "Cost by Model"))
     print(ascii_pie_chart(analysis.task_distribution, "Task Distribution"))
-    
+
     print("\nGenerating HTML report...")
     html_path = generate_html_report(analysis, recommendation, output_dir / "report.html")
     print(f"  ✓ {html_path}")
-    
+
     print("\nGenerating Markdown report...")
     md_report = generate_markdown_report(analysis, recommendation)
     md_path = output_dir / "report.md"
     md_path.write_text(md_report)
     print(f"  ✓ {md_path}")
-    
+
     if HAS_MATPLOTLIB:
         print("\nGenerating charts...")
         charts = generate_matplotlib_charts(analysis, recommendation, output_dir / "charts")
         for chart in charts:
             print(f"  ✓ {chart}")
-    
+
     print(f"\n✨ All reports generated in {output_dir}")
