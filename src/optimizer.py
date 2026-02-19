@@ -16,6 +16,7 @@ from .analyzer import MODEL_PRICING, UsageAnalysis, UsageRecord
 @dataclass
 class RoutingRule:
     """Single routing rule"""
+
     name: str
     condition: str  # Human-readable condition
     source_model: str  # Current model
@@ -30,6 +31,7 @@ class RoutingRule:
 @dataclass
 class RoutingRecommendation:
     """Complete routing recommendation"""
+
     rules: list[RoutingRule]
     decision_tree: dict[str, Any]
     current_cost: float
@@ -52,52 +54,44 @@ ROUTING_TARGETS = {
         {"model": "gpt-3.5-turbo", "type": "cloud", "cost": 0.002},
         {"model": "gemini-1.5-flash", "type": "cloud", "cost": 0.000375},
     ],
-
     # Code tasks → specialized code models
     "code": [
         {"model": "deepseek-coder-6.7b", "type": "local", "cost": 0.0},
         {"model": "qwen2.5-14b", "type": "local", "cost": 0.0},
         {"model": "gpt-4o-mini", "type": "cloud", "cost": 0.00075},
     ],
-
     # Analysis tasks → mid-tier models
     "analysis": [
         {"model": "qwen2.5-14b", "type": "local", "cost": 0.0},
         {"model": "llama-3.1-70b", "type": "local", "cost": 0.0},
         {"model": "gpt-4o-mini", "type": "cloud", "cost": 0.00075},
     ],
-
     # Creative tasks → capable but cheaper
     "creative": [
         {"model": "mistral-7b", "type": "local", "cost": 0.0},
         {"model": "llama-3.1-70b", "type": "local", "cost": 0.0},
         {"model": "claude-3-haiku", "type": "cloud", "cost": 0.0015},
     ],
-
     # Translation → efficient models
     "translation": [
         {"model": "qwen2.5-7b", "type": "local", "cost": 0.0},
         {"model": "gpt-3.5-turbo", "type": "cloud", "cost": 0.002},
     ],
-
     # Summarization → mid-tier
     "summarization": [
         {"model": "llama-3.1-8b", "type": "local", "cost": 0.0},
         {"model": "gpt-3.5-turbo", "type": "cloud", "cost": 0.002},
     ],
-
     # Extraction → fast models
     "extraction": [
         {"model": "phi3-mini", "type": "local", "cost": 0.0},
         {"model": "gpt-3.5-turbo", "type": "cloud", "cost": 0.002},
     ],
-
     # Complex reasoning → keep expensive but optimize
     "reasoning": [
         {"model": "llama-3.1-70b", "type": "local", "cost": 0.0},
         {"model": "gpt-4o", "type": "cloud", "cost": 0.02},
     ],
-
     # General/unknown → mid-tier
     "general": [
         {"model": "qwen2.5-7b", "type": "local", "cost": 0.0},
@@ -132,6 +126,7 @@ QUALITY_REQUIREMENTS = {
 # =============================================================================
 # OPTIMIZER
 # =============================================================================
+
 
 class RoutingOptimizer:
     """Generates optimal routing recommendations"""
@@ -184,11 +179,12 @@ class RoutingOptimizer:
             monthly_savings=monthly_savings,
             annual_savings=monthly_savings * 12,
             savings_percentage=(monthly_savings / current_cost * 100) if current_cost > 0 else 0,
-            implementation_config=config
+            implementation_config=config,
         )
 
-    def _generate_rule(self, task_type: str, current_model: str,
-                       records: list[UsageRecord]) -> Optional[RoutingRule]:
+    def _generate_rule(
+        self, task_type: str, current_model: str, records: list[UsageRecord]
+    ) -> Optional[RoutingRule]:
         """Generate a routing rule for a task/model combination"""
 
         # Check if current model is already optimal
@@ -221,7 +217,7 @@ class RoutingOptimizer:
             complexity=quality_req,
             priority=self._calculate_priority(task_type, quality_req),
             estimated_savings=savings,
-            confidence=self._calculate_confidence(task_type, target["model"])
+            confidence=self._calculate_confidence(task_type, target["model"]),
         )
 
     def _get_target_model(self, task_type: str, current_model: str) -> Optional[dict]:
@@ -243,16 +239,14 @@ class RoutingOptimizer:
             return {"cost": record.cost, "model": record.model}
 
         new_cost = self._calculate_cost(
-            target["model"],
-            record.prompt_tokens,
-            record.completion_tokens
+            target["model"], record.prompt_tokens, record.completion_tokens
         )
 
         return {
             "cost": new_cost,
             "model": target["model"],
             "original_cost": record.cost,
-            "savings": record.cost - new_cost
+            "savings": record.cost - new_cost,
         }
 
     def _calculate_cost(self, model: str, prompt_tokens: int, completion_tokens: int) -> float:
@@ -306,10 +300,7 @@ class RoutingOptimizer:
 
     def _build_decision_tree(self, rules: list[RoutingRule]) -> dict[str, Any]:
         """Build a decision tree structure for visualization"""
-        tree = {
-            "name": "Request",
-            "children": []
-        }
+        tree = {"name": "Request", "children": []}
 
         # Group rules by task type
         by_task = defaultdict(list)
@@ -317,29 +308,27 @@ class RoutingOptimizer:
             by_task[rule.task_type].append(rule)
 
         for task_type, task_rules in by_task.items():
-            task_node = {
-                "name": f"Task: {task_type}",
-                "children": []
-            }
+            task_node = {"name": f"Task: {task_type}", "children": []}
 
             for rule in task_rules:
                 route_node = {
                     "name": f"Route to {rule.target_model}",
                     "savings": f"${rule.estimated_savings:.2f}",
-                    "confidence": f"{rule.confidence*100:.0f}%"
+                    "confidence": f"{rule.confidence * 100:.0f}%",
                 }
                 task_node["children"].append(route_node)
 
             tree["children"].append(task_node)
 
         # Add default route
-        tree["children"].append({
-            "name": "Default",
-            "children": [{
-                "name": "Keep original model",
-                "reason": "Complex task or no better option"
-            }]
-        })
+        tree["children"].append(
+            {
+                "name": "Default",
+                "children": [
+                    {"name": "Keep original model", "reason": "Complex task or no better option"}
+                ],
+            }
+        )
 
         return tree
 
@@ -354,21 +343,20 @@ class RoutingOptimizer:
             "local_models": {
                 "enabled": self.prefer_local,
                 "endpoint": "http://localhost:11434",
-                "models": ["llama-3.1-8b", "qwen2.5-7b", "deepseek-coder-6.7b"]
-            }
+                "models": ["llama-3.1-8b", "qwen2.5-7b", "deepseek-coder-6.7b"],
+            },
         }
 
         for rule in rules:
-            config["routing_rules"].append({
-                "name": rule.name,
-                "task_type": rule.task_type,
-                "target_model": rule.target_model,
-                "priority": rule.priority,
-                "conditions": {
+            config["routing_rules"].append(
+                {
+                    "name": rule.name,
                     "task_type": rule.task_type,
-                    "complexity": rule.complexity
+                    "target_model": rule.target_model,
+                    "priority": rule.priority,
+                    "conditions": {"task_type": rule.task_type, "complexity": rule.complexity},
                 }
-            })
+            )
 
         return config
 
@@ -377,8 +365,10 @@ class RoutingOptimizer:
 # REPORT GENERATION
 # =============================================================================
 
-def generate_optimization_report(analysis: UsageAnalysis,
-                                  recommendation: RoutingRecommendation) -> str:
+
+def generate_optimization_report(
+    analysis: UsageAnalysis, recommendation: RoutingRecommendation
+) -> str:
     """Generate a formatted optimization report"""
 
     lines = []
@@ -389,7 +379,13 @@ def generate_optimization_report(analysis: UsageAnalysis,
     lines.append("╠" + "═" * 68 + "╣")
 
     # Summary
-    lines.append("║" + f"  Analysis Period: {analysis.start_date.strftime('%Y-%m-%d')} to {analysis.end_date.strftime('%Y-%m-%d')}".ljust(67) + "║")
+    lines.append(
+        "║"
+        + f"  Analysis Period: {analysis.start_date.strftime('%Y-%m-%d')} to {analysis.end_date.strftime('%Y-%m-%d')}".ljust(
+            67
+        )
+        + "║"
+    )
     lines.append("║" + f"  Total Requests: {analysis.total_requests:,}".ljust(67) + "║")
     lines.append("║" + f"  Total Tokens: {analysis.total_tokens:,}".ljust(67) + "║")
 
@@ -420,8 +416,16 @@ def generate_optimization_report(analysis: UsageAnalysis,
 
     # Savings
     lines.append("╠" + "═" * 68 + "╣")
-    lines.append("║" + f"  💰 MONTHLY SAVINGS: ${recommendation.monthly_savings:,.2f} ({recommendation.savings_percentage:.1f}%)".ljust(67) + "║")
-    lines.append("║" + f"  💰 ANNUAL SAVINGS:  ${recommendation.annual_savings:,.2f}".ljust(67) + "║")
+    lines.append(
+        "║"
+        + f"  💰 MONTHLY SAVINGS: ${recommendation.monthly_savings:,.2f} ({recommendation.savings_percentage:.1f}%)".ljust(
+            67
+        )
+        + "║"
+    )
+    lines.append(
+        "║" + f"  💰 ANNUAL SAVINGS:  ${recommendation.annual_savings:,.2f}".ljust(67) + "║"
+    )
     lines.append("╚" + "═" * 68 + "╝")
 
     return "\n".join(lines)
@@ -482,5 +486,7 @@ if __name__ == "__main__":
     for rule in recommendation.rules[:10]:
         print(f"  {rule.name}")
         print(f"    {rule.source_model} → {rule.target_model}")
-        print(f"    Saves: ${rule.estimated_savings:.2f} (confidence: {rule.confidence*100:.0f}%)")
+        print(
+            f"    Saves: ${rule.estimated_savings:.2f} (confidence: {rule.confidence * 100:.0f}%)"
+        )
         print()

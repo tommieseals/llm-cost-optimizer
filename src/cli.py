@@ -58,15 +58,17 @@ def cmd_analyze(args):
         }
         print(json.dumps(output, indent=2, default=str))
     else:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("  USAGE ANALYSIS REPORT")
-        print(f"{'='*60}")
-        print(f"  Period: {analysis.start_date.strftime('%Y-%m-%d')} to {analysis.end_date.strftime('%Y-%m-%d')}")
+        print(f"{'=' * 60}")
+        print(
+            f"  Period: {analysis.start_date.strftime('%Y-%m-%d')} to {analysis.end_date.strftime('%Y-%m-%d')}"
+        )
         print(f"  Requests: {analysis.total_requests:,}")
         print(f"  Tokens: {analysis.total_tokens:,}")
         print(f"  Total Cost: ${analysis.total_cost:,.2f}")
         print(f"  Avg Cost/Request: ${analysis.avg_cost_per_request:.4f}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
 
         print(ascii_bar_chart(analysis.cost_by_model, "Cost by Model ($)"))
         print(ascii_pie_chart(analysis.task_distribution, "\nTask Distribution"))
@@ -78,8 +80,12 @@ def cmd_analyze(args):
         patterns = analyzer.get_patterns()
         if patterns["optimization_candidates"]["count"] > 0:
             print("\n⚠️  OPTIMIZATION OPPORTUNITY DETECTED")
-            print(f"   {patterns['optimization_candidates']['count']} requests using expensive models for simple tasks")
-            print(f"   Potential savings: ${patterns['optimization_candidates']['potential_savings']:.2f}")
+            print(
+                f"   {patterns['optimization_candidates']['count']} requests using expensive models for simple tasks"
+            )
+            print(
+                f"   Potential savings: ${patterns['optimization_candidates']['potential_savings']:.2f}"
+            )
 
     return 0
 
@@ -98,10 +104,7 @@ def cmd_optimize(args):
     analysis = analyzer.analyze()
 
     # Optimize
-    optimizer = RoutingOptimizer(
-        prefer_local=args.prefer_local,
-        max_latency_ms=args.max_latency
-    )
+    optimizer = RoutingOptimizer(prefer_local=args.prefer_local, max_latency_ms=args.max_latency)
     recommendation = optimizer.optimize(analysis)
 
     # Output
@@ -129,9 +132,9 @@ def cmd_optimize(args):
     else:
         print(generate_optimization_report(analysis, recommendation))
 
-        print("\n\n" + "="*60)
+        print("\n\n" + "=" * 60)
         print("  DECISION TREE")
-        print("="*60 + "\n")
+        print("=" * 60 + "\n")
         print(ascii_decision_tree(recommendation.decision_tree))
 
     return 0
@@ -219,7 +222,9 @@ def cmd_report(args):
             print(f"   ✓ {chart}")
 
     print(f"\n✨ All reports generated in {output_dir}/")
-    print(f"\n💰 Summary: ${recommendation.monthly_savings:,.2f}/month ({recommendation.savings_percentage:.1f}% savings)")
+    print(
+        f"\n💰 Summary: ${recommendation.monthly_savings:,.2f}/month ({recommendation.savings_percentage:.1f}% savings)"
+    )
 
     return 0
 
@@ -279,6 +284,7 @@ def cmd_export_config(args):
     if args.output_format == "yaml":
         try:
             import yaml
+
             output = yaml.dump(config, default_flow_style=False, sort_keys=False)
         except ImportError:
             print("Warning: PyYAML not installed, using JSON", file=sys.stderr)
@@ -413,7 +419,7 @@ Examples:
   llm-optimize costs usage.json --by model
   llm-optimize export-config usage.json --format yaml
   llm-optimize interactive
-        """
+        """,
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -421,24 +427,42 @@ Examples:
     # Analyze command
     analyze_parser = subparsers.add_parser("analyze", help="Analyze usage logs")
     analyze_parser.add_argument("file", help="Usage log file (JSON/CSV)")
-    analyze_parser.add_argument("--format", "-f", choices=["auto", "openai", "anthropic", "csv", "json"],
-                                default="auto", help="Log format")
+    analyze_parser.add_argument(
+        "--format",
+        "-f",
+        choices=["auto", "openai", "anthropic", "csv", "json"],
+        default="auto",
+        help="Log format",
+    )
     analyze_parser.add_argument("--start", help="Start date (YYYY-MM-DD)")
     analyze_parser.add_argument("--end", help="End date (YYYY-MM-DD)")
     analyze_parser.add_argument("--json", action="store_true", help="Output as JSON")
     analyze_parser.set_defaults(func=cmd_analyze)
 
     # Optimize command
-    optimize_parser = subparsers.add_parser("optimize", help="Generate optimization recommendations")
+    optimize_parser = subparsers.add_parser(
+        "optimize", help="Generate optimization recommendations"
+    )
     optimize_parser.add_argument("file", help="Usage log file")
-    optimize_parser.add_argument("--format", "-f", choices=["auto", "openai", "anthropic", "csv", "json"],
-                                 default="auto", help="Log format")
-    optimize_parser.add_argument("--prefer-local", action="store_true", default=True,
-                                 help="Prefer local models (default: true)")
-    optimize_parser.add_argument("--cloud-only", action="store_true",
-                                 help="Only recommend cloud models")
-    optimize_parser.add_argument("--max-latency", type=int, default=5000,
-                                 help="Max acceptable latency (ms)")
+    optimize_parser.add_argument(
+        "--format",
+        "-f",
+        choices=["auto", "openai", "anthropic", "csv", "json"],
+        default="auto",
+        help="Log format",
+    )
+    optimize_parser.add_argument(
+        "--prefer-local",
+        action="store_true",
+        default=True,
+        help="Prefer local models (default: true)",
+    )
+    optimize_parser.add_argument(
+        "--cloud-only", action="store_true", help="Only recommend cloud models"
+    )
+    optimize_parser.add_argument(
+        "--max-latency", type=int, default=5000, help="Max acceptable latency (ms)"
+    )
     optimize_parser.add_argument("--json", action="store_true", help="Output as JSON")
     optimize_parser.set_defaults(func=cmd_optimize)
 
@@ -446,23 +470,39 @@ Examples:
     report_parser = subparsers.add_parser("report", help="Generate full optimization report")
     report_parser.add_argument("file", help="Usage log file")
     report_parser.add_argument("--output", "-o", default="./output", help="Output directory")
-    report_parser.add_argument("--format", "-f", choices=["auto", "openai", "anthropic", "csv", "json"],
-                               default="auto", help="Log format")
-    report_parser.add_argument("--formats", nargs="+", default=["all"],
-                               choices=["all", "html", "md", "json", "txt"],
-                               help="Report formats to generate")
+    report_parser.add_argument(
+        "--format",
+        "-f",
+        choices=["auto", "openai", "anthropic", "csv", "json"],
+        default="auto",
+        help="Log format",
+    )
+    report_parser.add_argument(
+        "--formats",
+        nargs="+",
+        default=["all"],
+        choices=["all", "html", "md", "json", "txt"],
+        help="Report formats to generate",
+    )
     report_parser.add_argument("--charts", action="store_true", help="Generate matplotlib charts")
-    report_parser.add_argument("--cloud-only", action="store_true",
-                               help="Only recommend cloud models")
+    report_parser.add_argument(
+        "--cloud-only", action="store_true", help="Only recommend cloud models"
+    )
     report_parser.set_defaults(func=cmd_report)
 
     # Costs command
     costs_parser = subparsers.add_parser("costs", help="Show cost breakdown")
     costs_parser.add_argument("file", help="Usage log file")
-    costs_parser.add_argument("--by", choices=["model", "task", "day"], default="model",
-                              help="Group costs by")
-    costs_parser.add_argument("--format", "-f", choices=["auto", "openai", "anthropic", "csv", "json"],
-                              default="auto", help="Log format")
+    costs_parser.add_argument(
+        "--by", choices=["model", "task", "day"], default="model", help="Group costs by"
+    )
+    costs_parser.add_argument(
+        "--format",
+        "-f",
+        choices=["auto", "openai", "anthropic", "csv", "json"],
+        default="auto",
+        help="Log format",
+    )
     costs_parser.add_argument("--json", action="store_true", help="Output as JSON")
     costs_parser.set_defaults(func=cmd_costs)
 
@@ -470,10 +510,12 @@ Examples:
     export_parser = subparsers.add_parser("export-config", help="Export routing configuration")
     export_parser.add_argument("file", help="Usage log file")
     export_parser.add_argument("--output", "-o", help="Output file")
-    export_parser.add_argument("--output-format", choices=["json", "yaml"], default="json",
-                               help="Output format")
-    export_parser.add_argument("--cloud-only", action="store_true",
-                               help="Only recommend cloud models")
+    export_parser.add_argument(
+        "--output-format", choices=["json", "yaml"], default="json", help="Output format"
+    )
+    export_parser.add_argument(
+        "--cloud-only", action="store_true", help="Only recommend cloud models"
+    )
     export_parser.set_defaults(func=cmd_export_config)
 
     # Interactive command

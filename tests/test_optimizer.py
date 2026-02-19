@@ -29,7 +29,7 @@ class TestRoutingOptimizer:
                 completion_tokens=50,
                 total_tokens=150,
                 task_type="simple",
-                cost=0.005
+                cost=0.005,
             ),
             UsageRecord(
                 timestamp=datetime(2024, 1, 15, 10, 0),
@@ -38,7 +38,7 @@ class TestRoutingOptimizer:
                 completion_tokens=300,
                 total_tokens=800,
                 task_type="code",
-                cost=0.025
+                cost=0.025,
             ),
             UsageRecord(
                 timestamp=datetime(2024, 1, 15, 11, 0),
@@ -47,7 +47,7 @@ class TestRoutingOptimizer:
                 completion_tokens=800,
                 total_tokens=1800,
                 task_type="reasoning",
-                cost=0.075
+                cost=0.075,
             ),
         ]
 
@@ -82,7 +82,7 @@ class TestRoutingOptimizer:
             hourly_distribution={9: 1, 10: 1, 11: 1},
             avg_tokens_per_request=916.67,
             avg_cost_per_request=0.035,
-            task_distribution=dict(task_distribution)
+            task_distribution=dict(task_distribution),
         )
 
     def test_optimize_generates_rules(self, sample_analysis):
@@ -136,9 +136,17 @@ class TestRoutingTargets:
 
     def test_all_task_types_have_targets(self):
         """All defined task types should have routing targets."""
-        expected_tasks = ["simple", "code", "analysis", "creative",
-                         "translation", "summarization", "extraction",
-                         "reasoning", "general"]
+        expected_tasks = [
+            "simple",
+            "code",
+            "analysis",
+            "creative",
+            "translation",
+            "summarization",
+            "extraction",
+            "reasoning",
+            "general",
+        ]
 
         for task in expected_tasks:
             assert task in ROUTING_TARGETS, f"Missing targets for {task}"
@@ -203,7 +211,7 @@ class TestRoutingRule:
             complexity="low",
             priority=100,
             estimated_savings=10.0,
-            confidence=0.95
+            confidence=0.95,
         )
 
         assert rule.name == "test_rule"

@@ -18,6 +18,7 @@ from typing import Any
 @dataclass
 class UsageRecord:
     """Single API usage record"""
+
     timestamp: datetime
     model: str
     prompt_tokens: int
@@ -33,12 +34,13 @@ class UsageRecord:
     @property
     def tokens_per_dollar(self) -> float:
         """Efficiency metric"""
-        return self.total_tokens / self.cost if self.cost > 0 else float('inf')
+        return self.total_tokens / self.cost if self.cost > 0 else float("inf")
 
 
 @dataclass
 class UsageAnalysis:
     """Complete usage analysis results"""
+
     records: list[UsageRecord]
     start_date: datetime
     end_date: datetime
@@ -70,19 +72,16 @@ MODEL_PRICING = {
     "gpt-4o-mini": {"input": 0.15, "output": 0.60},
     "gpt-3.5-turbo": {"input": 0.50, "output": 1.50},
     "gpt-3.5-turbo-16k": {"input": 3.00, "output": 4.00},
-
     # Anthropic
     "claude-3-opus": {"input": 15.00, "output": 75.00},
     "claude-3-sonnet": {"input": 3.00, "output": 15.00},
     "claude-3-haiku": {"input": 0.25, "output": 1.25},
     "claude-3.5-sonnet": {"input": 3.00, "output": 15.00},
     "claude-2": {"input": 8.00, "output": 24.00},
-
     # Google
     "gemini-pro": {"input": 0.50, "output": 1.50},
     "gemini-1.5-pro": {"input": 3.50, "output": 10.50},
     "gemini-1.5-flash": {"input": 0.075, "output": 0.30},
-
     # Local/Open Source (effectively free)
     "llama-3.1-8b": {"input": 0.00, "output": 0.00},
     "llama-3.1-70b": {"input": 0.00, "output": 0.00},
@@ -93,7 +92,6 @@ MODEL_PRICING = {
     "deepseek-coder-6.7b": {"input": 0.00, "output": 0.00},
     "mistral-7b": {"input": 0.00, "output": 0.00},
     "phi3-mini": {"input": 0.00, "output": 0.00},
-
     # Cloud Open Source (via API)
     "llama-3.1-70b-instruct": {"input": 0.52, "output": 0.75},
     "llama-3.1-8b-instruct": {"input": 0.06, "output": 0.06},
@@ -190,6 +188,7 @@ def estimate_complexity(prompt: str, completion_tokens: int) -> str:
 # LOG PARSERS
 # =============================================================================
 
+
 def parse_openai_export(filepath: Path) -> list[UsageRecord]:
     """Parse OpenAI API usage export"""
     records = []
@@ -203,22 +202,28 @@ def parse_openai_export(filepath: Path) -> list[UsageRecord]:
     for entry in entries:
         try:
             record = UsageRecord(
-                timestamp=datetime.fromisoformat(entry.get("timestamp", entry.get("created_at", ""))),
+                timestamp=datetime.fromisoformat(
+                    entry.get("timestamp", entry.get("created_at", ""))
+                ),
                 model=normalize_model_name(entry.get("model", "unknown")),
                 prompt_tokens=entry.get("prompt_tokens", entry.get("n_context_tokens_total", 0)),
-                completion_tokens=entry.get("completion_tokens", entry.get("n_generated_tokens_total", 0)),
+                completion_tokens=entry.get(
+                    "completion_tokens", entry.get("n_generated_tokens_total", 0)
+                ),
                 total_tokens=entry.get("total_tokens", 0),
                 prompt=entry.get("prompt", entry.get("request", {}).get("prompt", "")),
                 response=entry.get("response", entry.get("choices", [{}])[0].get("text", "")),
                 latency_ms=entry.get("latency_ms", 0),
-                metadata=entry
+                metadata=entry,
             )
 
             if record.total_tokens == 0:
                 record.total_tokens = record.prompt_tokens + record.completion_tokens
 
             record.task_type = classify_task(record.prompt)
-            record.cost = calculate_cost(record.model, record.prompt_tokens, record.completion_tokens)
+            record.cost = calculate_cost(
+                record.model, record.prompt_tokens, record.completion_tokens
+            )
 
             records.append(record)
         except Exception as e:
@@ -248,11 +253,13 @@ def parse_anthropic_export(filepath: Path) -> list[UsageRecord]:
                 total_tokens=usage.get("input_tokens", 0) + usage.get("output_tokens", 0),
                 prompt=extract_anthropic_prompt(entry),
                 response=entry.get("content", [{}])[0].get("text", ""),
-                metadata=entry
+                metadata=entry,
             )
 
             record.task_type = classify_task(record.prompt)
-            record.cost = calculate_cost(record.model, record.prompt_tokens, record.completion_tokens)
+            record.cost = calculate_cost(
+                record.model, record.prompt_tokens, record.completion_tokens
+            )
 
             records.append(record)
         except Exception as e:
@@ -275,8 +282,12 @@ def parse_csv_logs(filepath: Path) -> list[UsageRecord]:
                 timestamp = row.get("timestamp") or row.get("created_at") or row.get("date")
                 model = row.get("model") or row.get("model_id") or "unknown"
                 prompt_tokens = int(row.get("prompt_tokens") or row.get("input_tokens") or 0)
-                completion_tokens = int(row.get("completion_tokens") or row.get("output_tokens") or 0)
-                total_tokens = int(row.get("total_tokens") or 0) or (prompt_tokens + completion_tokens)
+                completion_tokens = int(
+                    row.get("completion_tokens") or row.get("output_tokens") or 0
+                )
+                total_tokens = int(row.get("total_tokens") or 0) or (
+                    prompt_tokens + completion_tokens
+                )
                 prompt = row.get("prompt") or row.get("input") or row.get("request") or ""
 
                 record = UsageRecord(
@@ -286,11 +297,13 @@ def parse_csv_logs(filepath: Path) -> list[UsageRecord]:
                     completion_tokens=completion_tokens,
                     total_tokens=total_tokens,
                     prompt=prompt,
-                    metadata=dict(row)
+                    metadata=dict(row),
                 )
 
                 record.task_type = classify_task(record.prompt)
-                record.cost = calculate_cost(record.model, record.prompt_tokens, record.completion_tokens)
+                record.cost = calculate_cost(
+                    record.model, record.prompt_tokens, record.completion_tokens
+                )
 
                 records.append(record)
             except Exception as e:
@@ -324,20 +337,26 @@ def parse_custom_json(filepath: Path) -> list[UsageRecord]:
             record = UsageRecord(
                 timestamp=parse_timestamp(entry),
                 model=normalize_model_name(find_field(entry, ["model", "model_id", "model_name"])),
-                prompt_tokens=int(find_field(entry, ["prompt_tokens", "input_tokens", "n_prompt"], 0)),
-                completion_tokens=int(find_field(entry, ["completion_tokens", "output_tokens", "n_completion"], 0)),
+                prompt_tokens=int(
+                    find_field(entry, ["prompt_tokens", "input_tokens", "n_prompt"], 0)
+                ),
+                completion_tokens=int(
+                    find_field(entry, ["completion_tokens", "output_tokens", "n_completion"], 0)
+                ),
                 total_tokens=int(find_field(entry, ["total_tokens", "tokens", "n_tokens"], 0)),
                 prompt=find_field(entry, ["prompt", "input", "request", "query"], ""),
                 response=find_field(entry, ["response", "output", "completion", "answer"], ""),
                 latency_ms=int(find_field(entry, ["latency_ms", "latency", "duration_ms"], 0)),
-                metadata=entry
+                metadata=entry,
             )
 
             if record.total_tokens == 0:
                 record.total_tokens = record.prompt_tokens + record.completion_tokens
 
             record.task_type = classify_task(record.prompt)
-            record.cost = calculate_cost(record.model, record.prompt_tokens, record.completion_tokens)
+            record.cost = calculate_cost(
+                record.model, record.prompt_tokens, record.completion_tokens
+            )
 
             records.append(record)
         except Exception as e:
@@ -350,6 +369,7 @@ def parse_custom_json(filepath: Path) -> list[UsageRecord]:
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
+
 
 def normalize_model_name(model: str) -> str:
     """Normalize model names across providers"""
@@ -435,6 +455,7 @@ def extract_anthropic_prompt(entry: dict) -> str:
 # =============================================================================
 # MAIN ANALYZER
 # =============================================================================
+
 
 class UsageAnalyzer:
     """Main usage analyzer class"""
@@ -530,7 +551,7 @@ class UsageAnalyzer:
             hourly_distribution=dict(hourly_distribution),
             avg_tokens_per_request=total_tokens / len(records),
             avg_cost_per_request=total_cost / len(records),
-            task_distribution=dict(task_distribution)
+            task_distribution=dict(task_distribution),
         )
 
     def get_patterns(self) -> dict[str, Any]:
@@ -571,15 +592,15 @@ class UsageAnalyzer:
         simple_tasks = {"simple", "extraction", "translation"}
 
         candidates = [
-            r for r in self.records
-            if r.model in expensive_models and r.task_type in simple_tasks
+            r for r in self.records if r.model in expensive_models and r.task_type in simple_tasks
         ]
 
         patterns["optimization_candidates"] = {
             "count": len(candidates),
             "potential_savings": sum(r.cost for r in candidates) * 0.9,  # 90% savings possible
-            "examples": [{"prompt": r.prompt[:100], "model": r.model, "cost": r.cost}
-                        for r in candidates[:5]]
+            "examples": [
+                {"prompt": r.prompt[:100], "model": r.model, "cost": r.cost} for r in candidates[:5]
+            ],
         }
 
         return patterns

@@ -125,7 +125,7 @@ class TestUsageAnalyzer:
                     "prompt_tokens": 100,
                     "completion_tokens": 50,
                     "total_tokens": 150,
-                    "prompt": "What is the capital of France?"
+                    "prompt": "What is the capital of France?",
                 },
                 {
                     "timestamp": "2024-01-15T10:00:00Z",
@@ -133,12 +133,12 @@ class TestUsageAnalyzer:
                     "prompt_tokens": 500,
                     "completion_tokens": 300,
                     "total_tokens": 800,
-                    "prompt": "Write a Python function to sort a list"
-                }
+                    "prompt": "Write a Python function to sort a list",
+                },
             ]
         }
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(data, f)
             return Path(f.name)
 
@@ -181,7 +181,7 @@ class TestUsageRecord:
             prompt_tokens=1000,
             completion_tokens=500,
             total_tokens=1500,
-            cost=0.05
+            cost=0.05,
         )
 
         assert record.tokens_per_dollar == 30000  # 1500 / 0.05
@@ -194,10 +194,10 @@ class TestUsageRecord:
             prompt_tokens=1000,
             completion_tokens=500,
             total_tokens=1500,
-            cost=0.0
+            cost=0.0,
         )
 
-        assert record.tokens_per_dollar == float('inf')
+        assert record.tokens_per_dollar == float("inf")
 
 
 class TestModelPricing:
@@ -206,9 +206,14 @@ class TestModelPricing:
     def test_has_major_models(self):
         """Should have pricing for major models."""
         major_models = [
-            "gpt-4", "gpt-4-turbo", "gpt-3.5-turbo",
-            "claude-3-opus", "claude-3-sonnet", "claude-3.5-sonnet",
-            "llama-3.1-8b", "llama-3.1-70b"
+            "gpt-4",
+            "gpt-4-turbo",
+            "gpt-3.5-turbo",
+            "claude-3-opus",
+            "claude-3-sonnet",
+            "claude-3.5-sonnet",
+            "llama-3.1-8b",
+            "llama-3.1-70b",
         ]
 
         for model in major_models:
@@ -217,9 +222,12 @@ class TestModelPricing:
     def test_local_models_are_free(self):
         """Local models should have zero cost."""
         local_models = [
-            "llama-3.1-8b", "llama-3.1-70b",
-            "qwen2.5-3b", "qwen2.5-7b",
-            "deepseek-coder-6.7b", "mistral-7b"
+            "llama-3.1-8b",
+            "llama-3.1-70b",
+            "qwen2.5-3b",
+            "qwen2.5-7b",
+            "deepseek-coder-6.7b",
+            "mistral-7b",
         ]
 
         for model in local_models:
